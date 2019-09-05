@@ -1,0 +1,30 @@
+#!/bin/sh -e
+#
+# S2I run script for the 'django alpine' image.
+# The run script executes the server that runs your application.
+#
+# For more information see the documentation:
+#	https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
+#
+
+# Ensure that assigned uid has entry in /etc/passwd.
+if [ `id -u` -ge 10000 ]; then
+    cat /etc/passwd | sed '/^default/d' > /tmp/passwd
+    echo "default:x:`id -u`:`id -u`:0:/app:/bin/sh" >> /tmp/passwd
+    cat /tmp/passwd > /etc/passwd
+    rm /tmp/passwd
+fi
+
+echo "---> Migrating database ..."
+python /app/manage.py migrate
+
+
+echo "---> collecting static files ..."
+python /app/manage.py collectstatic --noinput
+
+cp -r /app/staticfiles /nginx
+
+echo "---> Serving application with Gunicorn ..."
+gunicorn config.wsgi --bind 0.0.0.0:5000 --chdir=/app
+
+
