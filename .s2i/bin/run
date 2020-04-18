@@ -1,0 +1,14 @@
+#!/bin/bash -e
+
+echo "---> Migrating database ..."
+/venv/bin/python /app/manage.py migrate
+
+
+echo "---> collecting static files ..."
+/venv/bin/python /app/manage.py collectstatic --noinput
+
+cp -r /app/staticfiles /nginx
+
+echo "---> Serving application with Gunicorn ..."
+/venv/bin/gunicorn simpledjango.wsgi --bind 0.0.0.0:5000 --chdir=/app
+
