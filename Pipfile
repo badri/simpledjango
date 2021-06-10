@@ -10,7 +10,7 @@ psycopg2 = "==2.8.3"
 pytz = "==2019.2"
 sqlparse = "==0.3.0"
 gunicorn = "==19.9.0"
-Django = "==2.2.10"
+Django = "==2.2.24"
 
 [requires]
 python_version = "3.6"
